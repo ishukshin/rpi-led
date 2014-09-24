@@ -3,7 +3,7 @@ rpi-led
 
 The project helps to connect any electric device like LED to the internet. Connection is performed via Raspberry Pi and node.js.
 
-`Usage`
+*Usage*
 
 0. Connect RPi to the internet via ethernet cable.
 1. Connect LED to GPIO pins 7 and GRND of Raspberry Pi.
