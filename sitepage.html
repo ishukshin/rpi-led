@@ -1,9 +1,4 @@
 <!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
 <html>
     <head>
         <title>Page that makes led blink</title>
@@ -11,6 +6,79 @@ and open the template in the editor.
         <meta name="viewport" content="width=device-width">
     </head>
     <body>
-        <div>Page that makes led blink!</div>
+
+        <script src="http://server.ru:3141/socket.io/socket.io.js"></script>
+
+        <script>
+            function setSlided(val) {
+                if (val == 0) {
+                    $('#freq').html('turned off');
+                    $('#freq2').hide();
+                }
+                else {
+                    $('#freq').html(val);
+                    $('#freq2').show();
+                }
+            }
+
+            $(function() {
+                // соединяемся с nodejs на сервере
+                var socket = io.connect('http://server.ru:3141');
+                socket.emit('subscribe');
+
+                // при ответе сервера выставляем текущую fps
+                socket.on('subscribed', function(data) {
+                    if (!data.error) {
+                        setSlided(data.fps);
+                        $("#loading").hide();
+
+                        $("#slider").slider({
+                            min: 0,
+                            max: 20,
+                            value: data.fps,
+                            slide: function(event, ui) {
+                                $("#slider").slider({disabled: true});
+                                socket.emit('setfps', ui.value);
+                                //setSlided(ui.value);
+                            }
+                        });
+                    }
+                });
+                socket.on('setfps', function(data) {
+                    if (!data.error) {
+                        setSlided(data.fps);
+                        $("#slider").slider({value: data.fps});
+                        $("#slider").slider({disabled: false});
+                    }
+                });
+            });
+        </script>
+
+
+
+        <h1>LED connected to the internet</h1>
+
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+
+        <div class="panel panel-info">
+            <div class="panel-heading">Manage LED via internet</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div  style="height:40px;position:relative;top:12px;">
+                            <div id="slider"><div id="loading" style="position:relative;top:-4px;">Connecting <img src="/img/loading.gif" alt=""></div></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="well-sm">Blinks <b id="freq">turned off</b> <span id="freq2" style="display:none;">per second</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                The first LED, connected to the internet :)
+            </div>
+        </div>
     </body>
 </html>
